@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sporting KC Youth — Campaign Performance Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --skc-navy: #0C2340; --skc-navy-dark: #071628; --skc-blue: #A7C6ED;
+            --skc-blue-mid: #7AADD8; --skc-gold: #F5A800; --skc-light: #EBF4FA;
+            --skc-border: #CBD5E1; --skc-bg: #F2F5F8; --skc-white: #FFFFFF;
+            --skc-text: #1F2937; --skc-muted: #6B7280;
+            --skc-good: #16A34A; --skc-warn: #D97706; --skc-bad: #DC2626;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--skc-bg); color:var(--skc-text); line-height:1.6; }
+        .header { position:sticky; top:0; background:linear-gradient(135deg,var(--skc-navy-dark) 0%,var(--skc-navy) 100%); border-bottom:3px solid var(--skc-gold); color:#fff; padding:16px 40px; display:flex; align-items:center; justify-content:space-between; z-index:100; box-shadow:0 2px 4px rgba(0,0,0,.1); }
+        .header-left { display:flex; align-items:center; gap:16px; }
+        .header-logo { height:56px; width:auto; object-fit:contain; }
+        .header-text h1 { font-size:22px; font-weight:700; margin-bottom:2px; }
+        .header-text p { font-size:13px; color:var(--skc-blue); opacity:.95; }
+        .header-right { text-align:right; font-size:13px; color:var(--skc-light); }
+        .header-right strong { display:block; font-weight:600; }
+        .controls-bar { position:sticky; top:89px; background:var(--skc-white); border-bottom:1px solid var(--skc-border); padding:12px 40px; display:flex; align-items:center; justify-content:space-between; z-index:99; }
+        .month-nav { display:flex; align-items:center; gap:12px; }
+        .month-nav button { background:var(--skc-white); border:1px solid var(--skc-border); color:var(--skc-navy); padding:7px 14px; cursor:pointer; border-radius:4px; font-size:14px; font-weight:600; transition:all .2s; }
+        .month-nav button:hover:not(:disabled) { background:var(--skc-light); border-color:var(--skc-blue-mid); }
+        .month-nav button:disabled { opacity:.4; cursor:not-allowed; }
+        .month-display { font-size:16px; font-weight:700; color:var(--skc-navy); min-width:200px; text-align:center; }
+        .data-note { font-size:12px; color:var(--skc-muted); }
+        .container { max-width:1400px; margin:0 auto; padding:32px 40px; }
+        .section { margin-bottom:36px; }
+        .section-title { font-size:16px; font-weight:700; color:var(--skc-navy); margin-bottom:14px; text-transform:uppercase; letter-spacing:.5px; }
+        .ytd-strip { background:linear-gradient(135deg,var(--skc-navy-dark),var(--skc-navy)); color:#fff; padding:14px 20px; border-radius:6px; font-size:13px; border-left:4px solid var(--skc-gold); }
+        .kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; }
+        .kpi-tile { background:var(--skc-white); border:1px solid var(--skc-border); border-radius:8px; padding:14px; text-align:center; }
+        .kpi-tile:hover { box-shadow:0 4px 12px rgba(0,0,0,.08); border-color:var(--skc-blue-mid); }
+        .kpi-label { font-size:11px; color:var(--skc-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; font-weight:600; }
+        .kpi-value { font-size:22px; font-weight:700; color:var(--skc-navy); }
+        .kpi-value.blue { color:var(--skc-blue-mid); }
+        .kpi-value.gold { color:var(--skc-gold); }
+        .kpi-value.green { color:var(--skc-good); }
+        .kpi-secondary { font-size:11px; color:var(--skc-muted); margin-top:2px; }
+        .card { background:var(--skc-white); border:1px solid var(--skc-border); border-radius:8px; padding:20px; margin-bottom:16px; }
+        .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--skc-border); }
+        .card-title { font-size:15px; font-weight:700; color:var(--skc-navy); }
+        .badge { display:inline-block; padding:3px 8px; background:var(--skc-light); border:1px solid var(--skc-blue-mid); color:var(--skc-navy); border-radius:4px; font-size:11px; font-weight:600; }
+        .status-badge { display:inline-block; padding:3px 8px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+        .status-badge.best-value { background:rgba(22,163,74,.1); color:#16A34A; }
+        .status-badge.top-volume { background:rgba(22,163,74,.1); color:#16A34A; }
+        .status-badge.strong { background:rgba(59,130,246,.1); color:#3B82F6; }
+        .status-badge.high-ctr { background:rgba(59,130,246,.1); color:#3B82F6; }
+        .status-badge.high-efficiency { background:rgba(16,185,129,.1); color:#10B981; }
+        .status-badge.optimizing { background:rgba(245,168,0,.1); color:#D97706; }
+        .status-badge.paused { background:rgba(107,114,128,.1); color:#6B7280; }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        thead { background:var(--skc-light); }
+        th { padding:10px 8px; text-align:left; font-weight:600; color:var(--skc-navy); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+        td { padding:10px 8px; border-bottom:1px solid var(--skc-border); }
+        tbody tr:hover { background:var(--skc-bg); }
+        .mom-wrapper { overflow-x:auto; }
+        .mom-table { margin-bottom:20px; }
+        .mom-table th, .mom-table td { min-width:90px; white-space:nowrap; }
+        .campaign-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+        .campaign-card { background:var(--skc-white); border:1px solid var(--skc-border); border-radius:8px; padding:16px; transition:all .2s; }
+        .campaign-card:hover { box-shadow:0 4px 12px rgba(0,0,0,.08); }
+        .campaign-card.paused { opacity:.7; }
+        .campaign-name { font-size:14px; font-weight:700; color:var(--skc-navy); margin-bottom:8px; }
+        .campaign-kpis { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px; }
+        .ckpi { text-align:center; padding:6px; background:var(--skc-bg); border-radius:6px; }
+        .ckpi-val { font-size:16px; font-weight:700; color:var(--skc-navy); }
+        .ckpi-label { font-size:9px; color:var(--skc-muted); text-transform:uppercase; }
+        .campaign-footer { display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:11px; color:var(--skc-muted); }
+        .chart-container { position:relative; height:280px; }
+        .insights-card { background:linear-gradient(135deg,var(--skc-navy-dark),var(--skc-navy)); border-radius:8px; padding:20px; color:#fff; }
+        .insights-card .section-title { color:var(--skc-gold); }
+        .insight-item { margin-bottom:12px; padding-left:18px; position:relative; font-size:13px; color:rgba(255,255,255,.9); }
+        .insight-item::before { content:'✓'; position:absolute; left:0; color:var(--skc-gold); font-weight:700; }
+        .ga4-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+        .ga4-panel { background:var(--skc-light); border:1px solid var(--skc-border); border-radius:8px; padding:14px; }
+        .ga4-panel.current { border-left:4px solid var(--skc-gold); }
+        .ga4-panel-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--skc-muted); margin-bottom:10px; }
+        .ga4-kpis { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .ga4-bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+        .ga4-bar-label { width:110px; font-size:11px; color:var(--skc-muted); }
+        .ga4-bar-bg { flex:1; background:var(--skc-border); border-radius:99px; height:8px; overflow:hidden; }
+        .ga4-bar-fill { height:100%; border-radius:99px; }
+        .ga4-bar-pct { width:36px; text-align:right; font-size:12px; font-weight:700; }
+        @media (max-width:768px) {
+            .header { padding:12px 16px; }
+            .container { padding:16px; }
+            .ga4-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img class="header-logo" src="data:image/png;base64,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" alt="SKC Youth Soccer" />
+            <div class="header-text">
+                <h1>Sporting KC Youth</h1>
+                <p>Youth Program — Campaign Performance Dashboard · 2026</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <strong>Prepared by Kazoo Media</strong>
+            <span id="generatedDate"></span>
+        </div>
+    </header>
+
+    <div class="controls-bar">
+        <div class="month-nav">
+            <button id="btnPrev">← Previous</button>
+            <div class="month-display" id="monthDisplay">August 2026 (1–10)</div>
+            <button id="btnNext">Next →</button>
+        </div>
+        <div class="data-note" id="dataNote">Data through August 10, 2026</div>
+    </div>
+
+    <div class="container">
+        <!-- YTD Strip -->
+        <div class="section">
+            <div class="section-title">Year-to-Date Summary</div>
+            <div id="ytdStrip" class="ytd-strip"></div>
+        </div>
+
+        <!-- KPI Strip -->
+        <div class="section">
+            <div class="section-title">Portfolio KPI Strip</div>
+            <div class="kpi-grid" id="kpiStrip"></div>
+        </div>
+
+        <!-- Campaign Cards -->
+        <div class="section">
+            <div class="section-title">Campaign Deep-Dive</div>
+            <div class="campaign-grid" id="campaignGrid"></div>
+        </div>
+
+        <!-- Portfolio Ranking -->
+        <div class="section">
+            <div class="section-title">Portfolio Ranking — Cost/Conv</div>
+            <div class="card">
+                <div class="mom-wrapper"><table id="rankingTable"></table></div>
+            </div>
+        </div>
+
+        <!-- Month-over-Month Portfolio -->
+        <div class="section">
+            <div class="section-title">Month-over-Month Portfolio Summary</div>
+            <div class="card">
+                <div class="mom-wrapper"><table class="mom-table" id="momTable"></table></div>
+                <div class="chart-container">
+                    <canvas id="momChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Per-Campaign MoM -->
+        <div class="section">
+            <div class="section-title">Per-Campaign Month-over-Month</div>
+            <div class="card">
+                <div class="mom-wrapper"><table id="campaignMomTable"></table></div>
+            </div>
+        </div>
+
+        <!-- GA4 Analytics -->
+        <div class="section">
+            <div class="section-title">&#128200; Website Analytics (GA4)</div>
+            <div class="card" id="ga4Section"></div>
+        </div>
+
+        <!-- Highlights -->
+        <div class="section">
+            <div class="insights-card" id="highlightsCard"></div>
+        </div>
+    </div>
+
+    <script>
+        // ─── DATA ────────────────────────────────────────────────────
+        const MONTHS = ['March 2026','April 2026','May 2026','June 2026 (1–29)','July 2026','August 2026 (1–10)'];
+        let currentMonthIdx = 5;
+
+        const youthMonthly = [
+          {
+            month:'March 2026', impr:67246, clicks:4751, spend:1111.56, conv:290.4, cpc:0.23, ctr:7.06, costConv:3.83,
+            campaigns:[
+              {name:'Youth – KC Soccer Camps',   impr:25095, clicks:1463, ctr:'5.83%',  spend:400.60, conv:102.55, costConv:3.91,  cpc:0.27, budget:'$13.33/day', audience:'Youth Sports Families',        status:'Top Volume'},
+              {name:'Youth – Sporting Stripes',  impr:16030, clicks:632,  ctr:'3.94%',  spend:146.96, conv:98.91,  costConv:1.49,  cpc:0.23, budget:'$5.00/day',  audience:'Youth Sports Families',        status:'Best Value'},
+              {name:'Youth – Sporting Stars',    impr:5700,  clicks:417,  ctr:'7.32%',  spend:146.50, conv:29.02,  costConv:5.05,  cpc:0.35, budget:'$5.00/day',  audience:'Youth Sports Families',        status:'Strong'},
+              {name:'Youth – Tourneys',          impr:3639,  clicks:501,  ctr:'13.77%', spend:85.93,  conv:35.23,  costConv:2.44,  cpc:0.17, budget:'$2.83/day',  audience:'Youth Athletes',               status:'High Efficiency'},
+              {name:'Sporting City – Soccer Team',impr:7412, clicks:1270, ctr:'17.13%', spend:167.86, conv:15.9,   costConv:10.56, cpc:0.13, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League',       impr:9370,  clicks:468,  ctr:'4.99%',  spend:163.71, conv:8.78,   costConv:18.65, cpc:0.35, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
+            ]
+          },
+          {
+            month:'April 2026', impr:35726, clicks:5045, spend:1126.42, conv:608.36, cpc:0.22, ctr:14.12, costConv:1.85,
+            campaigns:[
+              {name:'Youth – KC Soccer Camps',    impr:6453,  clicks:1509, ctr:'23.38%', spend:402.04, conv:228.94, costConv:1.76,  cpc:0.27, budget:'$13.33/day', audience:'Youth Sports Families',        status:'Top Volume'},
+              {name:'Youth – Sporting Stripes',   impr:2927,  clicks:627,  ctr:'21.42%', spend:148.75, conv:152.15, costConv:0.98,  cpc:0.24, budget:'$5.00/day',  audience:'Youth Sports Families',        status:'Best Value'},
+              {name:'Youth – Sporting Stars',     impr:2272,  clicks:468,  ctr:'20.60%', spend:151.27, conv:107.13, costConv:1.41,  cpc:0.32, budget:'$5.00/day',  audience:'Youth Sports Families',        status:'Strong'},
+              {name:'Youth – Tourneys',           impr:2026,  clicks:562,  ctr:'27.74%', spend:84.10,  conv:63.25,  costConv:1.33,  cpc:0.15, budget:'$2.83/day',  audience:'Youth Athletes',               status:'High Efficiency'},
+              {name:'Sporting City – Soccer Team', impr:5947, clicks:1479, ctr:'24.87%', spend:170.50, conv:43.75,  costConv:3.90,  cpc:0.12, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League',         impr:16101,clicks:400,  ctr:'2.48%',  spend:169.76, conv:13.14,  costConv:12.92, cpc:0.42, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
+            ]
+          },
+          {
+            month:'May 2026', impr:31216, clicks:5055, spend:1132.65, conv:643.38, cpc:0.22, ctr:16.20, costConv:1.76,
+            campaigns:[
+              {name:'Youth – KC Soccer Camps',    impr:5141,  clicks:1241, ctr:'24.14%', spend:405.60, conv:241.33, costConv:1.68,  cpc:0.33, budget:'$13.33/day', audience:'Youth Sports Families',        status:'Top Volume'},
+              {name:'Youth – Sporting Stripes',   impr:3201,  clicks:568,  ctr:'17.74%', spend:151.55, conv:172.65, costConv:0.88,  cpc:0.27, budget:'$5.00/day',  audience:'Youth Sports Families',        status:'Best Value'},
+              {name:'Youth – Sporting Stars',     impr:2265,  clicks:496,  ctr:'21.90%', spend:152.24, conv:124.65, costConv:1.22,  cpc:0.31, budget:'$5.00/day',  audience:'Youth Sports Families',        status:'Strong'},
+              {name:'Youth – Tourneys',           impr:1292,  clicks:286,  ctr:'22.14%', spend:82.91,  conv:63.42,  costConv:1.31,  cpc:0.29, budget:'$2.83/day',  audience:'Youth Athletes',               status:'High Efficiency'},
+              {name:'Sporting City – Soccer Team', impr:6137, clicks:2034, ctr:'33.14%', spend:170.50, conv:32.16,  costConv:5.30,  cpc:0.08, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League',         impr:13180,clicks:430,  ctr:'3.26%',  spend:169.75, conv:9.17,   costConv:18.52, cpc:0.39, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
+            ]
+          },
+          {
+            month:'June 2026 (1–29)', impr:19410, clicks:3951, spend:1120.67, conv:497.405, cpc:0.27, ctr:20.36, costConv:2.25,
+            campaigns:[
+              {name:'Youth – KC Soccer Camps',    impr:4158,  clicks:1026, ctr:'24.68%', spend:404.38, conv:198.70, costConv:2.04,  cpc:0.39, budget:'$13.33/day', audience:'Youth Sports Families',        status:'Top Volume'},
+              {name:'Youth – Sporting Stripes',   impr:1981,  clicks:373,  ctr:'18.83%', spend:113.45, conv:117.50, costConv:0.97,  cpc:0.30, budget:'$2.50/day',  audience:'Youth Sports Families',        status:'Best Value'},
+              {name:'Youth – Sporting Stars',     impr:1515,  clicks:295,  ctr:'19.47%', spend:110.02, conv:84.07,  costConv:1.31,  cpc:0.37, budget:'$2.50/day',  audience:'Youth Sports Families',        status:'Strong'},
+              {name:'Youth – Tourneys',           impr:1744,  clicks:420,  ctr:'24.08%', spend:152.26, conv:76.57,  costConv:1.99,  cpc:0.36, budget:'$7.83/day',  audience:'Youth Athletes',               status:'High Efficiency'},
+              {name:'Sporting City – Soccer Team', impr:4598, clicks:1420, ctr:'30.88%', spend:173.10, conv:13.18,  costConv:13.14, cpc:0.12, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League',        impr:5414,  clicks:417,  ctr:'7.70%',  spend:167.46, conv:7.38,   costConv:22.68, cpc:0.40, budget:'$5.66/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
+            ]
+          },
+          {
+            month:'July 2026', impr:16977, clicks:3937, spend:1122.01, conv:759.25, cpc:0.28, ctr:23.19, costConv:1.48,
+            campaigns:[
+              {name:'Youth – KC Soccer Camps',    impr:3569,  clicks:1114, ctr:'31.21%', spend:386.00, conv:305.53, costConv:1.26,  cpc:0.35, budget:'$2.74/day',  audience:'Youth Sports Families',        status:'Top Volume'},
+              {name:'Youth – Sporting Stripes',   impr:1604,  clicks:463,  ctr:'28.87%', spend:89.28,  conv:156.42, costConv:0.57,  cpc:0.19, budget:'$9.59/day',  audience:'Youth Sports Families',        status:'Best Value'},
+              {name:'Youth – Sporting Stars',     impr:1215,  clicks:275,  ctr:'22.63%', spend:76.04,  conv:70.62,  costConv:1.08,  cpc:0.28, budget:'$5.48/day',  audience:'Youth Sports Families',        status:'Strong'},
+              {name:'Youth – Tourneys',           impr:2947,  clicks:904,  ctr:'30.68%', spend:225.58, conv:193.31, costConv:1.17,  cpc:0.25, budget:'Paused',     audience:'Youth Athletes',               status:'High Efficiency'},
+              {name:'Sporting City – Soccer Team', impr:4741, clicks:580,  ctr:'12.23%', spend:169.62, conv:13.37,  costConv:12.69, cpc:0.29, budget:'$2.74/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League',        impr:2901,  clicks:601,  ctr:'20.72%', spend:175.49, conv:20.00,  costConv:8.77,  cpc:0.29, budget:'$9.59/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
+            ]
+          },
+          {
+            month:'August 2026 (1–10)', impr:4980, clicks:1129, spend:285.64, conv:203.33, cpc:0.25, ctr:22.67, costConv:1.40,
+            campaigns:[
+              {name:'Youth – KC Soccer Camps',    impr:453,  clicks:162, ctr:'35.76%', spend:25.63,  conv:26.00,  costConv:0.99,  cpc:0.16, budget:'$2.74/day',  audience:'Youth Sports Families',        status:'Top Volume'},
+              {name:'Youth – Sporting Stripes',   impr:1196, clicks:308, ctr:'25.75%', spend:91.09,  conv:103.33, costConv:0.88,  cpc:0.30, budget:'$9.59/day',  audience:'Youth Sports Families',        status:'Best Value'},
+              {name:'Youth – Sporting Stars',     impr:671,  clicks:195, ctr:'29.06%', spend:51.72,  conv:65.00,  costConv:0.80,  cpc:0.27, budget:'$5.48/day',  audience:'Youth Sports Families',        status:'Strong'},
+              {name:'Youth – Tourneys',           impr:0,    clicks:0,   ctr:'—',      spend:0,      conv:0,       costConv:null,  cpc:0,    budget:'Paused',     audience:'Youth Athletes',               status:'Paused'},
+              {name:'Sporting City – Soccer Team', impr:952, clicks:187, ctr:'19.64%', spend:25.78,  conv:4.50,   costConv:5.73,  cpc:0.14, budget:'$2.74/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League',        impr:1709, clicks:277, ctr:'16.21%', spend:91.41,  conv:4.50,   costConv:20.31, cpc:0.33, budget:'$9.59/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
+            ]
+          }
+        ];
+
+        const youthHighlights = [
+          ['Sporting Stripes led with the best cost/conv across all campaigns at just $1.49.','Tourneys showed the highest conversion rate (13.77%) on the smallest budget.','KC Soccer Camps drove the most volume with 102 conversions and 25,095 impressions.'],
+          ['Portfolio average cost/conv improved 52% in a single month ($3.83 → $1.85).','KC Soccer Camps more than doubled conversions (102 → 229) at flat spend.','Sporting Stars conversion rate quadrupled (7.32% → 20.60%) — strongest single-month jump.'],
+          ['Sporting Stripes hit $0.88 cost/conv — best value in the portfolio through May.','KC Soccer Camps sustained top position with 241 conversions — portfolio volume leader.','Portfolio CTR improved from 14.12% to 16.20% — algorithm further optimized.'],
+          ['Tourneys budget increase to $7.83/day: impressions grew to 1,744 and conversions to 77.','Sporting Rec League improved CTR from 3.26% to 7.70% month-over-month.','Portfolio delivered 497 total conversions in June — strong summer momentum.'],
+          ['Sporting Stripes achieved its best-ever $0.57 cost/conv — strongest campaign ROI to date.','KC Soccer Camps delivered 306 conversions at $1.26 cost/conv — top volume and strong efficiency.','Portfolio delivered 759 conversions in July — the highest monthly output in campaign history.'],
+          ['August (1–10): Portfolio averaging $1.40 cost/conv — on pace with July record.','Sporting Stripes leading efficiency at $0.88 cost/conv with 103 conversions in 10 days.','Sporting Stars close behind at $0.80 cost/conv — best efficiency this month. Tourneys paused.']
+        ];
+
+        // ── GA4 DATA (Youth / Sporting KC — p528832210) ──
+        const youthGA4 = {
+          july: {
+            sessions: 136020, engRate: 50.39, engTime: '1m 06s',
+            paidSearch: 7006, paidSocial: null,
+            channels: {organic:49.5, direct:20.0, paidSearch:5.2, social:8.0, referral:4.5, other:12.8},
+            note: 'July 2026 — full month. Sporting KC property (p528832210). 7,006 paid search sessions from Google Ads.'
+          },
+          aug: {
+            sessions: 28061, engRate: 49.99, engTime: '1m 02s',
+            paidSearch: 2539, paidSocial: null,
+            channels: {organic:50.1, direct:19.5, paidSearch:9.0, social:7.8, referral:4.2, other:9.4},
+            note: 'August 2026 (1–9) — Sporting KC property (p528832210). 2,539 paid search sessions from Google Ads.'
+          }
+        };
+
+        let momChart = null;
+        let effChart = null;
+        let charts = {};
+
+        // ─── HELPERS ──────────────────────────────────────────────────
+        const fmt = {
+          n: v => v == null ? '—' : Number(v).toLocaleString(),
+          d: v => v == null ? '—' : '$' + Number(v).toFixed(2),
+          d0: v => v == null ? '—' : '$' + Number(v).toFixed(0),
+          pct: v => v == null ? '—' : Number(v).toFixed(2) + '%'
+        };
+
+        function statusBadge(s) {
+          const cls = (s || '').toLowerCase().replace(/[^a-z]/g, '-');
+          return `<span class="status-badge ${cls}">${s}</span>`;
+        }
+
+        // ─── RENDER FUNCTIONS ─────────────────────────────────────────
+        function renderYTD(idx) {
+          // Calculate cumulative totals through current month
+          const totals = youthMonthly.slice(0, idx + 1).reduce((acc, m) => ({
+            impr: acc.impr + m.impr, clicks: acc.clicks + m.clicks,
+            spend: acc.spend + m.spend, conv: acc.conv + m.conv
+          }), {impr:0, clicks:0, spend:0, conv:0});
+          const label = idx === 0 ? 'March 2026' : `Mar–${MONTHS[idx].replace(' 2026','').replace(' (1–10)','').replace(' (1–29)','')} 2026`;
+          document.getElementById('ytdStrip').innerHTML =
+            `<strong>${label} YTD:</strong>&nbsp;&nbsp;`+
+            `${fmt.n(Math.round(totals.impr))} impressions &nbsp;·&nbsp; `+
+            `${fmt.n(Math.round(totals.clicks))} clicks &nbsp;·&nbsp; `+
+            `${fmt.d0(totals.spend)} spend &nbsp;·&nbsp; `+
+            `${fmt.n(Math.round(totals.conv))} conversions &nbsp;·&nbsp; `+
+            `avg ${fmt.d(totals.spend / totals.conv)} cost/conv`;
+        }
+
+        function renderKPI(idx) {
+          const m = youthMonthly[idx];
+          document.getElementById('kpiStrip').innerHTML = `
+            <div class="kpi-tile"><div class="kpi-label">Impressions</div><div class="kpi-value">${fmt.n(m.impr)}</div></div>
+            <div class="kpi-tile"><div class="kpi-label">Clicks</div><div class="kpi-value">${fmt.n(m.clicks)}</div></div>
+            <div class="kpi-tile"><div class="kpi-label">CTR</div><div class="kpi-value blue">${m.ctr.toFixed(2)}%</div></div>
+            <div class="kpi-tile"><div class="kpi-label">Total Spend</div><div class="kpi-value gold">${m.spend.toFixed(2)}</div></div>
+            <div class="kpi-tile"><div class="kpi-label">Conversions</div><div class="kpi-value green">${fmt.n(Math.round(m.conv))}</div></div>
+            <div class="kpi-tile"><div class="kpi-label">Cost/Conv</div><div class="kpi-value">${fmt.d(m.costConv)}</div></div>
+            <div class="kpi-tile"><div class="kpi-label">Avg CPC</div><div class="kpi-value">${fmt.d(m.cpc)}</div></div>
+          `;
+        }
+
+        function renderCampaignCards(idx) {
+          const m = youthMonthly[idx];
+          let html = '';
+          m.campaigns.forEach(c => {
+            const isPaused = c.status === 'Paused';
+            html += `
+              <div class="campaign-card${isPaused ? ' paused' : ''}">
+                <div class="card-header" style="margin-bottom:8px;padding-bottom:6px;">
+                  <div class="campaign-name">${c.name.replace('Youth – ','').replace('Sporting City – ','SC – ')}</div>
+                  ${statusBadge(c.status)}
+                </div>
+                <div class="campaign-kpis">
+                  <div class="ckpi"><div class="ckpi-val">${isPaused ? '—' : fmt.n(c.impr)}</div><div class="ckpi-label">Impr</div></div>
+                  <div class="ckpi"><div class="ckpi-val">${isPaused ? '—' : c.ctr}</div><div class="ckpi-label">CTR</div></div>
+                  <div class="ckpi"><div class="ckpi-val" style="color:var(--skc-gold)">${isPaused ? '—' : fmt.d(c.costConv)}</div><div class="ckpi-label">$/Conv</div></div>
+                </div>
+                <div style="font-size:12px;color:var(--skc-text);margin-bottom:6px;">
+                  ${fmt.n(c.conv.toFixed ? c.conv.toFixed(0) : c.conv)} conv · ${fmt.d(c.spend)} spent · ${c.cpc > 0 ? fmt.d(c.cpc) : '—'} CPC
+                </div>
+                <div class="campaign-footer">
+                  <span>Budget: ${c.budget}</span>
+                  <span>${c.audience}</span>
+                </div>
+              </div>`;
+          });
+          document.getElementById('campaignGrid').innerHTML = html;
+        }
+
+        function renderRankingTable(idx) {
+          const m = youthMonthly[idx];
+          const sorted = [...m.campaigns].filter(c => c.costConv != null).sort((a,b) => a.costConv - b.costConv);
+          let html = `<thead><tr><th>Rank</th><th>Campaign</th><th>Cost/Conv</th><th>Conv</th><th>Spend</th><th>CTR</th><th>Status</th></tr></thead><tbody>`;
+          sorted.forEach((c, i) => {
+            html += `<tr>
+              <td style="font-weight:700;color:var(--skc-gold)">#${i+1}</td>
+              <td style="font-weight:600;">${c.name}</td>
+              <td style="font-weight:700;color:var(--skc-good)">${fmt.d(c.costConv)}</td>
+              <td>${c.conv.toFixed ? c.conv.toFixed(0) : c.conv}</td>
+              <td>${fmt.d(c.spend)}</td>
+              <td>${c.ctr}</td>
+              <td>${statusBadge(c.status)}</td>
+            </tr>`;
+          });
+          html += `</tbody>`;
+          document.getElementById('rankingTable').innerHTML = html;
+        }
+
+        function renderMoMTable(idx) {
+          // Portfolio MoM with separators between months
+          const monthShort = m => m.replace(' 2026','').replace(' (1–29)','').replace(' (1–10)','');
+          const rows = ['Impressions','Clicks','CTR (%)','Spend ($)','Conversions','CPA ($)','Campaigns'];
+          let html = `<thead><tr><th style="min-width:110px;"></th>`;
+          MONTHS.forEach((m, i) => {
+            const isCurr = i === currentMonthIdx;
+            const sep = 'border-left:3px solid var(--skc-navy);';
+            html += `<th style="${sep}${isCurr ? 'background:var(--skc-gold);color:var(--skc-navy);' : ''}">${monthShort(m)}</th>`;
+          });
+          html += `</tr></thead><tbody>`;
+          rows.forEach((label, rowIdx) => {
+            html += `<tr><td style="font-weight:600;">${label}</td>`;
+            MONTHS.forEach((m, colIdx) => {
+              const isCurr = colIdx === currentMonthIdx;
+              const sep = 'border-left:3px solid #E5EAF0;';
+              const d = youthMonthly[colIdx];
+              let val = '—';
+              if (rowIdx === 0) val = fmt.n(d.impr);
+              else if (rowIdx === 1) val = fmt.n(d.clicks);
+              else if (rowIdx === 2) val = d.ctr.toFixed(2) + '%';
+              else if (rowIdx === 3) val = fmt.d0(d.spend);
+              else if (rowIdx === 4) val = fmt.n(Math.round(d.conv));
+              else if (rowIdx === 5) val = fmt.d(d.costConv);
+              else if (rowIdx === 6) val = d.campaigns.filter(c=>c.status!=='Paused').length + ' active';
+              html += `<td style="${sep}${isCurr ? 'background:rgba(245,168,0,.1);font-weight:600;' : ''}">${val}</td>`;
+            });
+            html += `</tr>`;
+          });
+          html += `</tbody>`;
+          document.getElementById('momTable').innerHTML = html;
+
+          // Chart
+          const spend = MONTHS.map((_,i) => youthMonthly[i].spend);
+          const conv  = MONTHS.map((_,i) => youthMonthly[i].conv);
+          if (momChart) momChart.destroy();
+          const ctx = document.getElementById('momChart');
+          momChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: MONTHS.map(m => m.replace(' 2026','').replace(' (1–29)','').replace(' (1–10)','')),
+              datasets: [
+                { label:'Spend ($)', data:spend, backgroundColor:'rgba(245,168,0,0.7)', borderColor:'#F5A800', borderWidth:2, yAxisID:'y', type:'bar' },
+                { label:'Conversions', data:conv, borderColor:'#16A34A', borderWidth:3, fill:false, yAxisID:'y1', type:'line', tension:0.4 }
+              ]
+            },
+            options: {
+              responsive:true, maintainAspectRatio:false,
+              interaction:{mode:'index',intersect:false},
+              plugins:{legend:{display:true,labels:{color:'#1F2937',font:{size:12,weight:'600'},padding:12,usePointStyle:true}}},
+              scales:{
+                y:{type:'linear',display:true,position:'left',title:{display:true,text:'Spend ($)'}},
+                y1:{type:'linear',display:true,position:'right',title:{display:true,text:'Conversions'},grid:{drawOnChartArea:false}},
+                x:{grid:{color:'rgba(0,0,0,0.03)'}}
+              }
+            }
+          });
+        }
+
+        function renderCampaignMoM(idx) {
+          const firstMonth = youthMonthly[0];
+          const campaignNames = firstMonth.campaigns.map(c => c.name);
+          let html = `<thead><tr><th style="min-width:160px;">Campaign</th>`;
+          MONTHS.forEach((m, i) => {
+            const sep = 'border-left:3px solid var(--skc-navy);';
+            html += `<th style="${sep}${i===currentMonthIdx?'background:var(--skc-gold);color:var(--skc-navy);':''}">${m.replace(' 2026','').replace(' (1–29)','').replace(' (1–10)','')} $/Conv</th>`;
+          });
+          html += `</tr></thead><tbody>`;
+          campaignNames.forEach((name, ci) => {
+            html += `<tr><td style="font-weight:600;font-size:12px;">${name}</td>`;
+            MONTHS.forEach((_, mi) => {
+              const c = youthMonthly[mi].campaigns[ci];
+              const sep = 'border-left:2px solid #E5EAF0;';
+              const isCurr = mi === currentMonthIdx;
+              let val = c.costConv ? fmt.d(c.costConv) : (c.status === 'Paused' ? 'Paused' : '—');
+              html += `<td style="${sep}${isCurr?'background:rgba(245,168,0,.1);font-weight:600;':''}">${val}</td>`;
+            });
+            html += `</tr>`;
+          });
+          html += `</tbody>`;
+          document.getElementById('campaignMomTable').innerHTML = html;
+        }
+
+        function renderGA4(idx) {
+          const el = document.getElementById('ga4Section');
+          const isAug = idx === 5;
+          if (!isAug) {
+            // For non-August months, show a note
+            el.innerHTML = `<p style="color:var(--skc-muted);font-size:13px;">&#128200; GA4 data shown for July and August on the latest month view. Navigate to August 2026 to see website analytics.</p>`;
+            return;
+          }
+          // August: show July full month + Aug 1-9 side by side
+          const jul = youthGA4.july;
+          const aug = youthGA4.aug;
+          const channelColors = {organic:'#16A34A',direct:'#3B82F6',paidSearch:'#F5A800',social:'#8B5CF6',referral:'#0891B2',other:'#9CA3AF'};
+          const channelLabels = {organic:'Organic Search',direct:'Direct',paidSearch:'Paid Search',social:'Organic Social',referral:'Referral',other:'Other'};
+          
+          function panelKPIs(d) {
+            return `<div class="ga4-kpis">
+              <div class="kpi-tile" style="padding:8px;"><div class="kpi-value" style="font-size:18px;">${d.sessions.toLocaleString()}</div><div class="kpi-label" style="font-size:9px;">Sessions</div></div>
+              <div class="kpi-tile" style="padding:8px;"><div class="kpi-value blue" style="font-size:18px;">${d.engRate}%</div><div class="kpi-label" style="font-size:9px;">Engagement</div></div>
+              <div class="kpi-tile" style="padding:8px;"><div class="kpi-value" style="font-size:18px;">${d.engTime}</div><div class="kpi-label" style="font-size:9px;">Avg. Eng. Time</div></div>
+              <div class="kpi-tile" style="padding:8px;"><div class="kpi-value gold" style="font-size:18px;">${d.paidSearch.toLocaleString()}</div><div class="kpi-label" style="font-size:9px;">Paid Search</div></div>
+            </div>`;
+          }
+
+          function panelChannels(d) {
+            let bars = '';
+            Object.entries(d.channels).forEach(([key, pct]) => {
+              bars += `<div class="ga4-bar-row">
+                <div class="ga4-bar-label">${channelLabels[key]||key}</div>
+                <div class="ga4-bar-bg"><div class="ga4-bar-fill" style="width:${pct}%;background:${channelColors[key]||'#9CA3AF'};"></div></div>
+                <div class="ga4-bar-pct">${pct}%</div>
+              </div>`;
+            });
+            return bars;
+          }
+
+          el.innerHTML = `
+            <div class="ga4-grid">
+              <div class="ga4-panel">
+                <div class="ga4-panel-title">July 2026 — Full Month</div>
+                ${panelKPIs(jul)}
+                <div style="margin-top:12px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--skc-muted);margin-bottom:8px;">Traffic by Channel</div>
+                ${panelChannels(jul)}
+                <div style="margin-top:10px;font-size:11px;color:var(--skc-muted);">${jul.note}</div>
+              </div>
+              <div class="ga4-panel current">
+                <div class="ga4-panel-title">August 2026 (1–9) ← Current</div>
+                ${panelKPIs(aug)}
+                <div style="margin-top:12px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--skc-muted);margin-bottom:8px;">Traffic by Channel</div>
+                ${panelChannels(aug)}
+                <div style="margin-top:10px;font-size:11px;color:var(--skc-muted);">${aug.note}</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--skc-muted);margin-top:4px;">&#9432; GA4 property: Sporting KC — p528832210</div>
+          `;
+        }
+
+        function renderHighlights(idx) {
+          const hl = youthHighlights[idx] || [];
+          let html = `<div class="section-title" style="color:var(--skc-gold);">&#9733; Campaign Highlights — ${MONTHS[idx]}</div>`;
+          hl.forEach(h => { html += `<div class="insight-item">${h}</div>`; });
+          document.getElementById('highlightsCard').innerHTML = html;
+        }
+
+        // ─── MAIN RENDER ──────────────────────────────────────────────
+        function renderDashboard(idx) {
+          document.getElementById('monthDisplay').textContent = MONTHS[idx];
+          document.getElementById('btnPrev').disabled = idx === 0;
+          document.getElementById('btnNext').disabled = idx === MONTHS.length - 1;
+          document.getElementById('dataNote').textContent = 
+            idx === 5 ? 'Data through August 10, 2026' : `Data through ${MONTHS[idx]}`;
+          
+          renderYTD(idx);
+          renderKPI(idx);
+          renderCampaignCards(idx);
+          renderRankingTable(idx);
+          renderMoMTable(idx);
+          renderCampaignMoM(idx);
+          renderGA4(idx);
+          renderHighlights(idx);
+        }
+
+        // ─── EVENT LISTENERS ──────────────────────────────────────────
+        document.getElementById('btnPrev').addEventListener('click', () => {
+          if (currentMonthIdx > 0) { currentMonthIdx--; renderDashboard(currentMonthIdx); }
+        });
+        document.getElementById('btnNext').addEventListener('click', () => {
+          if (currentMonthIdx < MONTHS.length - 1) { currentMonthIdx++; renderDashboard(currentMonthIdx); }
+        });
+
+        // ─── INIT ────────────────────────────────────────────────────
+        document.getElementById('generatedDate').textContent = new Date().toLocaleDateString('en-US', {year:'numeric',month:'short',day:'numeric'});
+        renderDashboard(currentMonthIdx);
+    </script>
+</body>
+</html>

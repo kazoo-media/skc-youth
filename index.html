@@ -112,10 +112,10 @@
     <div class="controls-bar">
         <div class="month-nav">
             <button id="btnPrev">← Previous</button>
-            <div class="month-display" id="monthDisplay">August 2026 (1–17)</div>
+            <div class="month-display" id="monthDisplay">August 2026 (1–24)</div>
             <button id="btnNext">Next →</button>
         </div>
-        <div class="data-note" id="dataNote">Data through August 17, 2026</div>
+        <div class="data-note" id="dataNote">Data through August 24, 2026</div>
     </div>
 
     <div class="container">
@@ -178,7 +178,7 @@
 
     <script>
         // ─── DATA ────────────────────────────────────────────────────
-        const MONTHS = ['March 2026','April 2026','May 2026','June 2026 (1–29)','July 2026','August 2026 (1–17)'];
+        const MONTHS = ['March 2026','April 2026','May 2026','June 2026 (1–29)','July 2026','August 2026 (1–24)'];
         let currentMonthIdx = 5;
 
         const youthMonthly = [
@@ -238,14 +238,14 @@
             ]
           },
           {
-            month:'August 2026 (1–17)', impr:9824, clicks:1995, spend:506.82, conv:387.34, cpc:0.25, ctr:20.31, costConv:1.31,
+            month:'August 2026 (1–24)', impr:15904, clicks:2867, spend:701.03, conv:551.00, cpc:0.24, ctr:18.03, costConv:1.27,
             campaigns:[
-              {name:'Youth – KC Soccer Camps',    impr:809,  clicks:277, ctr:'34.24%', spend:46.04,  conv:46.59,  costConv:0.99,  cpc:0.17, budget:'$2.74/day',  audience:'Youth Sports Families',        status:'Top Volume'},
-              {name:'Youth – Sporting Stripes',   impr:2118, clicks:557, ctr:'26.30%', spend:160.89, conv:200.08, costConv:0.80,  cpc:0.29, budget:'$9.59/day',  audience:'Youth Sports Families',        status:'Best Value'},
-              {name:'Youth – Sporting Stars',     impr:1258, clicks:333, ctr:'26.47%', spend:91.45,  conv:118.95, costConv:0.77,  cpc:0.27, budget:'$5.48/day',  audience:'Youth Sports Families',        status:'Strong'},
+              {name:'Youth – KC Soccer Camps',    impr:1390, clicks:472, ctr:'33.96%', spend:64.40,  conv:66.53,  costConv:0.97,  cpc:0.14, budget:'$2.74/day',  audience:'Youth Sports Families',        status:'Top Volume'},
+              {name:'Youth – Sporting Stripes',   impr:3132, clicks:784, ctr:'25.03%', spend:221.70, conv:283.57, costConv:0.78,  cpc:0.28, budget:'$9.59/day',  audience:'Youth Sports Families',        status:'Best Value'},
+              {name:'Youth – Sporting Stars',     impr:1845, clicks:516, ctr:'27.97%', spend:127.76, conv:159.40, costConv:0.80,  cpc:0.25, budget:'$5.48/day',  audience:'Youth Sports Families',        status:'Strong'},
               {name:'Youth – Tourneys',           impr:0,    clicks:0,   ctr:'—',      spend:0,      conv:0,       costConv:null,  cpc:0,    budget:'Paused',     audience:'Youth Athletes',               status:'Paused'},
-              {name:'Sporting City – Soccer Team', impr:1544,clicks:328, ctr:'21.24%', spend:45.62,  conv:7.53,   costConv:6.06,  cpc:0.14, budget:'$2.74/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
-              {name:'Sporting Rec League',        impr:4095, clicks:500, ctr:'12.21%', spend:162.82, conv:14.19,  costConv:11.47, cpc:0.33, budget:'$9.59/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
+              {name:'Sporting City – Soccer Team', impr:2052,clicks:429, ctr:'20.91%', spend:63.25,  conv:15.88,  costConv:3.98,  cpc:0.15, budget:'$2.74/day',  audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League',        impr:7485, clicks:666, ctr:'8.90%',  spend:223.92, conv:25.62,  costConv:8.74,  cpc:0.34, budget:'$9.59/day',  audience:'Soccer Fans & SKC Supporters', status:'Optimizing'}
             ]
           }
         ];
@@ -256,7 +256,7 @@
           ['Sporting Stripes hit $0.88 cost/conv — best value in the portfolio through May.','KC Soccer Camps sustained top position with 241 conversions — portfolio volume leader.','Portfolio CTR improved from 14.12% to 16.20% — algorithm further optimized.'],
           ['Tourneys budget increase to $7.83/day: impressions grew to 1,744 and conversions to 77.','Sporting Rec League improved CTR from 3.26% to 7.70% month-over-month.','Portfolio delivered 497 total conversions in June — strong summer momentum.'],
           ['Sporting Stripes achieved its best-ever $0.57 cost/conv — strongest campaign ROI to date.','KC Soccer Camps delivered 306 conversions at $1.26 cost/conv — top volume and strong efficiency.','Portfolio delivered 759 conversions in July — the highest monthly output in campaign history.'],
-          ['August (1–17): Portfolio averaging $1.31 cost/conv — on pace with July\u2019s record efficiency.','Sporting Stars leads efficiency at $0.77 cost/conv, with Sporting Stripes close behind at $0.80 and driving the most volume (200 conversions).','KC Soccer Camps holds the strongest CTR (34.24%) in the portfolio this month. Tourneys remains paused.']
+          ['August (1–24): Portfolio averaging $1.27 cost/conv — on pace with July\u2019s record efficiency.','Sporting Stripes leads volume with 284 conversions at $0.78 cost/conv, with Sporting Stars close behind at $0.80.','KC Soccer Camps holds the strongest CTR (33.96%) in the portfolio this month. Tourneys remains paused.']
         ];
 
         // ── GA4 DATA (Youth / Sporting KC — p528832210) ──
@@ -299,7 +299,7 @@
             impr: acc.impr + m.impr, clicks: acc.clicks + m.clicks,
             spend: acc.spend + m.spend, conv: acc.conv + m.conv
           }), {impr:0, clicks:0, spend:0, conv:0});
-          const label = idx === 0 ? 'March 2026' : `Mar–${MONTHS[idx].replace(' 2026','').replace(' (1–17)','').replace(' (1–29)','')} 2026`;
+          const label = idx === 0 ? 'March 2026' : `Mar–${MONTHS[idx].replace(' 2026','').replace(' (1–24)','').replace(' (1–29)','')} 2026`;
           document.getElementById('ytdStrip').innerHTML =
             `<strong>${label} YTD:</strong>&nbsp;&nbsp;`+
             `${fmt.n(Math.round(totals.impr))} impressions &nbsp;·&nbsp; `+
@@ -371,7 +371,7 @@
 
         function renderMoMTable(idx) {
           // Portfolio MoM with separators between months
-          const monthShort = m => m.replace(' 2026','').replace(' (1–29)','').replace(' (1–17)','');
+          const monthShort = m => m.replace(' 2026','').replace(' (1–29)','').replace(' (1–24)','');
           const rows = ['Impressions','Clicks','CTR (%)','Spend ($)','Conversions','CPA ($)','Campaigns'];
           let html = `<thead><tr><th style="min-width:110px;"></th>`;
           MONTHS.forEach((m, i) => {
@@ -409,7 +409,7 @@
           momChart = new Chart(ctx, {
             type: 'bar',
             data: {
-              labels: MONTHS.map(m => m.replace(' 2026','').replace(' (1–29)','').replace(' (1–17)','')),
+              labels: MONTHS.map(m => m.replace(' 2026','').replace(' (1–29)','').replace(' (1–24)','')),
               datasets: [
                 { label:'Spend ($)', data:spend, backgroundColor:'rgba(245,168,0,0.7)', borderColor:'#F5A800', borderWidth:2, yAxisID:'y', type:'bar' },
                 { label:'Conversions', data:conv, borderColor:'#16A34A', borderWidth:3, fill:false, yAxisID:'y1', type:'line', tension:0.4 }
@@ -434,7 +434,7 @@
           let html = `<thead><tr><th style="min-width:160px;">Campaign</th>`;
           MONTHS.forEach((m, i) => {
             const sep = 'border-left:3px solid var(--skc-navy);';
-            html += `<th style="${sep}${i===currentMonthIdx?'background:var(--skc-gold);color:var(--skc-navy);':''}">${m.replace(' 2026','').replace(' (1–29)','').replace(' (1–17)','')} $/Conv</th>`;
+            html += `<th style="${sep}${i===currentMonthIdx?'background:var(--skc-gold);color:var(--skc-navy);':''}">${m.replace(' 2026','').replace(' (1–29)','').replace(' (1–24)','')} $/Conv</th>`;
           });
           html += `</tr></thead><tbody>`;
           campaignNames.forEach((name, ci) => {
@@ -521,7 +521,7 @@
           document.getElementById('btnPrev').disabled = idx === 0;
           document.getElementById('btnNext').disabled = idx === MONTHS.length - 1;
           document.getElementById('dataNote').textContent =
-            idx === 5 ? 'Data through August 17, 2026' : `Data through ${MONTHS[idx]}`;
+            idx === 5 ? 'Data through August 24, 2026' : `Data through ${MONTHS[idx]}`;
           
           renderYTD(idx);
           renderKPI(idx);

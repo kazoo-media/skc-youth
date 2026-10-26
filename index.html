@@ -112,10 +112,10 @@
     <div class="controls-bar">
         <div class="month-nav">
             <button id="btnPrev">← Previous</button>
-            <div class="month-display" id="monthDisplay">October 2026 (1–12)</div>
+            <div class="month-display" id="monthDisplay">October 2026 (1–25)</div>
             <button id="btnNext">Next →</button>
         </div>
-        <div class="data-note" id="dataNote">Data through October 12, 2026</div>
+        <div class="data-note" id="dataNote">Data through October 25, 2026</div>
     </div>
 
     <div class="container">
@@ -178,7 +178,7 @@
 
     <script>
         // ─── DATA ────────────────────────────────────────────────────
-        const MONTHS = ['March 2026','April 2026','May 2026','June 2026 (1–29)','July 2026','August 2026','September 2026','October 2026 (1–12)'];
+        const MONTHS = ['March 2026','April 2026','May 2026','June 2026 (1–29)','July 2026','August 2026','September 2026','October 2026 (1–25)'];
         let currentMonthIdx = 7;
 
         const youthMonthly = [
@@ -260,14 +260,14 @@
             ]
           },
           {
-            month:'October 2026 (1–12)', impr:20732, clicks:1076, spend:508.02, conv:143.04, cpc:0.47, ctr:5.19, costConv:3.55,
+            month:'October 2026 (1–25)', impr:39861, clicks:2543, spend:1098.35, conv:391.96, cpc:0.43, ctr:6.38, costConv:2.80,
             campaigns:[
-              {name:'Youth – KC Soccer Camps', impr:1399, clicks:143, ctr:'10.22%', spend:50.11, conv:20.50, costConv:2.44, cpc:0.35, budget:'$4.33/day', audience:'Youth Sports Families', status:'Top Volume'},
-              {name:'Youth – Sporting Stripes', impr:1877, clicks:280, ctr:'14.92%', spend:159.09, conv:72.85, costConv:2.18, cpc:0.57, budget:'$14.00/day', audience:'Youth Sports Families', status:'Best Value'},
-              {name:'Youth – Sporting Stars', impr:1172, clicks:200, ctr:'17.06%', spend:86.43, conv:40.42, costConv:2.14, cpc:0.43, budget:'$7.48/day', audience:'Youth Sports Families', status:'Strong'},
+              {name:'Youth – KC Soccer Camps', impr:2331, clicks:318, ctr:'13.64%', spend:108.54, conv:54.46, costConv:1.99, cpc:0.34, budget:'$4.33/day', audience:'Youth Sports Families', status:'Top Volume'},
+              {name:'Youth – Sporting Stripes', impr:3885, clicks:661, ctr:'17.01%', spend:348.74, conv:183.56, costConv:1.90, cpc:0.53, budget:'$14.00/day', audience:'Youth Sports Families', status:'Best Value'},
+              {name:'Youth – Sporting Stars', impr:2698, clicks:476, ctr:'17.64%', spend:184.33, conv:114.75, costConv:1.61, cpc:0.39, budget:'$7.48/day', audience:'Youth Sports Families', status:'Strong'},
               {name:'Youth – Tourneys', impr:0, clicks:0, ctr:'—', spend:0.00, conv:0, costConv:null, cpc:0, budget:'Paused', audience:'Youth Athletes', status:'Paused'},
-              {name:'Sporting City – Soccer Team', impr:1291, clicks:162, ctr:'12.55%', spend:48.06, conv:3.55, costConv:13.52, cpc:0.30, budget:'$4.33/day', audience:'Soccer Fans & SKC Supporters', status:'Needs Attention'},
-              {name:'Sporting Rec League', impr:14993, clicks:291, ctr:'1.94%', spend:164.33, conv:5.72, costConv:28.72, cpc:0.56, budget:'$14.00/day', audience:'Soccer Fans & SKC Supporters', status:'Needs Attention'}
+              {name:'Sporting City – Soccer Team', impr:3330, clicks:400, ctr:'12.01%', spend:106.28, conv:12.24, costConv:8.68, cpc:0.27, budget:'$4.33/day', audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
+              {name:'Sporting Rec League', impr:27617, clicks:688, ctr:'2.49%', spend:350.46, conv:26.95, costConv:13.00, cpc:0.51, budget:'$14.00/day', audience:'Soccer Fans & SKC Supporters', status:'Needs Attention'}
             ]
           }
         ];
@@ -280,7 +280,7 @@
           ['Sporting Stripes achieved its best-ever $0.57 cost/conv — strongest campaign ROI to date.','KC Soccer Camps delivered 306 conversions at $1.26 cost/conv — top volume and strong efficiency.','Portfolio delivered 759 conversions in July — the highest monthly output in campaign history.'],
           ['August (final): Portfolio closed at $1.30 cost/conv on 720.54 conversions — a full-month record for the account.','Sporting Stripes led volume with 351 conversions at $0.86 cost/conv, with Sporting Stars close behind at $0.77.','KC Soccer Camps posted the strongest CTR (36.32%) in the portfolio this month. Tourneys remained paused all August.'],
           ['September (final): Portfolio closed at $2.46 cost/conv on 542.52 conversions and $1,337.25 spend — full-month actuals from the Sep 1–30 Google Ads range.','Sporting Stripes led volume with 266.78 conversions at $1.60 cost/conv, with Sporting Stars close behind at $1.64.','Sporting Rec League took roughly two-thirds of impressions (32,194) at a 2.05% CTR and $8.74/conv — still the portfolio\'s efficiency drag and worth a targeting check.'],
-          ['October (1–12): Portfolio at $3.55 cost/conv on 143.04 conversions and $508.02 spend through 12 days — above September\'s $2.46 so far.','Sporting Stripes (72.85 conversions, $2.18/conv) and Sporting Stars (40.42 conversions, $2.14/conv) carry the efficiency, with KC Soccer Camps at $2.44/conv.','Sporting Rec League has taken 14,993 impressions and $164.33 for just 5.72 conversions ($28.72/conv), and Sporting City is at $13.52/conv — together they are what is pulling the portfolio average up.']
+          ['October (1–25): Portfolio at $2.80 cost/conv on 391.96 conversions and $1,098.35 spend through 25 days — still above September\'s $2.46 but improving from $2.96 at Oct 18.','Sporting Stripes (183.56 conversions, $1.90/conv), Sporting Stars (114.75 conversions, $1.61/conv) and KC Soccer Camps ($1.99/conv) carry the efficiency.','Sporting Rec League has taken 27,617 impressions and $350.46 for 26.95 conversions ($13.00/conv, down from $14.50 at Oct 18); Sporting City improved to $8.68/conv, leaving Rec League as the main drag on the portfolio average.']
         ];
 
         // ── GA4 DATA (Youth / Sporting KC — p528832210) ──

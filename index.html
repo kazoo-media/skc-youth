@@ -112,10 +112,10 @@
     <div class="controls-bar">
         <div class="month-nav">
             <button id="btnPrev">← Previous</button>
-            <div class="month-display" id="monthDisplay">October 2026</div>
+            <div class="month-display" id="monthDisplay">November 2026 (1–8)</div>
             <button id="btnNext">Next →</button>
         </div>
-        <div class="data-note" id="dataNote">Data through October 31, 2026</div>
+        <div class="data-note" id="dataNote">Data through November 8, 2026</div>
     </div>
 
     <div class="container">
@@ -178,8 +178,8 @@
 
     <script>
         // ─── DATA ────────────────────────────────────────────────────
-        const MONTHS = ['March 2026','April 2026','May 2026','June 2026 (1–29)','July 2026','August 2026','September 2026','October 2026'];
-        let currentMonthIdx = 7;
+        const MONTHS = ['March 2026','April 2026','May 2026','June 2026 (1–29)','July 2026','August 2026','September 2026','October 2026','November 2026 (1–8)'];
+        let currentMonthIdx = 8;
 
         const youthMonthly = [
           {
@@ -269,6 +269,17 @@
               {name:'Sporting City – Soccer Team', impr:4589, clicks:516, ctr:'11.24%', spend:132.00, conv:24.52, costConv:5.38, cpc:0.26, budget:'$4.33/day', audience:'Soccer Fans & SKC Supporters', status:'High CTR'},
               {name:'Sporting Rec League', impr:31649, clicks:862, ctr:'2.72%', spend:426.29, conv:35.66, costConv:11.95, cpc:0.49, budget:'$14.00/day', audience:'Soccer Fans & SKC Supporters', status:'Needs Attention'}
             ]
+          },
+          {
+            month:'November 2026 (1–8)', impr:9397, clicks:829, spend:361.26, conv:125.56, cpc:0.44, ctr:8.82, costConv:2.88,
+            campaigns:[
+              {name:'Youth – KC Soccer Camps', impr:481, clicks:123, ctr:'25.57%', spend:35.64, conv:13.47, costConv:2.65, cpc:0.29, budget:'$4.33/day', audience:'Youth Sports Families', status:'Top Volume'},
+              {name:'Youth – Sporting Stripes', impr:1206, clicks:241, ctr:'19.98%', spend:115.54, conv:66.69, costConv:1.73, cpc:0.48, budget:'$14.00/day', audience:'Youth Sports Families', status:'Best Value'},
+              {name:'Youth – Sporting Stars', impr:761, clicks:157, ctr:'20.63%', spend:61.71, conv:39.83, costConv:1.55, cpc:0.39, budget:'$7.48/day', audience:'Youth Sports Families', status:'Strong'},
+              {name:'Youth – Tourneys', impr:0, clicks:0, ctr:'—', spend:0.00, conv:0, costConv:null, cpc:0, budget:'Paused', audience:'Youth Athletes', status:'Paused'},
+              {name:'Sporting City – Soccer Team', impr:1986, clicks:147, ctr:'7.40%', spend:36.37, conv:0, costConv:null, cpc:0.25, budget:'$4.33/day', audience:'Soccer Fans & SKC Supporters', status:'Needs Attention'},
+              {name:'Sporting Rec League', impr:4963, clicks:161, ctr:'3.24%', spend:112.00, conv:5.57, costConv:20.12, cpc:0.7, budget:'$14.00/day', audience:'Soccer Fans & SKC Supporters', status:'Needs Attention'}
+            ]
           }
         ];
 
@@ -280,7 +291,8 @@
           ['Sporting Stripes achieved its best-ever $0.57 cost/conv — strongest campaign ROI to date.','KC Soccer Camps delivered 306 conversions at $1.26 cost/conv — top volume and strong efficiency.','Portfolio delivered 759 conversions in July — the highest monthly output in campaign history.'],
           ['August (final): Portfolio closed at $1.30 cost/conv on 720.54 conversions — a full-month record for the account.','Sporting Stripes led volume with 351 conversions at $0.86 cost/conv, with Sporting Stars close behind at $0.77.','KC Soccer Camps posted the strongest CTR (36.32%) in the portfolio this month. Tourneys remained paused all August.'],
           ['September (final): Portfolio closed at $2.46 cost/conv on 542.52 conversions and $1,337.25 spend — full-month actuals from the Sep 1–30 Google Ads range.','Sporting Stripes led volume with 266.78 conversions at $1.60 cost/conv, with Sporting Stars close behind at $1.64.','Sporting Rec League took roughly two-thirds of impressions (32,194) at a 2.05% CTR and $8.74/conv — still the portfolio\'s efficiency drag and worth a targeting check.'],
-          ['October (final): Portfolio closed at $2.60 cost/conv on 509.50 conversions and $1,325.33 spend — full-month actuals from the Oct 1–31 Google Ads range, slightly above September\'s $2.46.','Sporting Stripes led volume with 239.05 conversions at $1.75 cost/conv, with Sporting Stars the most efficient at $1.50.','Sporting Rec League took two-thirds of impressions (31,649) at $11.95/conv and Sporting City finished at $5.38/conv — both improved through the back half of the month, but Rec League remains the main drag on the portfolio average.']
+          ['October (final): Portfolio closed at $2.60 cost/conv on 509.50 conversions and $1,325.33 spend — full-month actuals from the Oct 1–31 Google Ads range, slightly above September\'s $2.46.','Sporting Stripes led volume with 239.05 conversions at $1.75 cost/conv, with Sporting Stars the most efficient at $1.50.','Sporting Rec League took two-thirds of impressions (31,649) at $11.95/conv and Sporting City finished at $5.38/conv — both improved through the back half of the month, but Rec League remains the main drag on the portfolio average.'],
+          ['November (1–8): Portfolio at $2.88 cost/conv on 125.56 conversions and $361.26 spend through 8 days — above October\'s $2.60, with recent conversions likely still posting.','Sporting Stripes (66.69 conversions, $1.73/conv) and Sporting Stars (39.83 conversions, $1.55/conv) continue to carry the efficiency.','Sporting City has no conversions yet on $36.37 spend and Sporting Rec League is at $20.12/conv (5.57 conversions) — both worth watching as the month fills in.']
         ];
 
         // ── GA4 DATA (Youth / Sporting KC — p528832210) ──
@@ -545,7 +557,7 @@
           document.getElementById('btnPrev').disabled = idx === 0;
           document.getElementById('btnNext').disabled = idx === MONTHS.length - 1;
           document.getElementById('dataNote').textContent =
-            (() => { const m = MONTHS[idx]; const pm = m.match(/^(\w+) \d{4} \(1–(\d+)\)$/); if (pm) return `Data through ${pm[1]} ${pm[2]}, 2026`; const mo = m.replace(' 2026',''); const dl = {March:31,April:30,May:31,June:30,July:31,August:31,September:30,October:31}; return `Data through ${mo} ${dl[mo]}, 2026`; })();
+            (() => { const m = MONTHS[idx]; const pm = m.match(/^(\w+) \d{4} \(1–(\d+)\)$/); if (pm) return `Data through ${pm[1]} ${pm[2]}, 2026`; const mo = m.replace(' 2026',''); const dl = {March:31,April:30,May:31,June:30,July:31,August:31,September:30,October:31,November:30}; return `Data through ${mo} ${dl[mo]}, 2026`; })();
           
           renderYTD(idx);
           renderKPI(idx);
